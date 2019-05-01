@@ -1,214 +1,243 @@
-class Cpuschedule:
+import os
 
-    def __init__(self):
-        # Default Data set
-        # self.data = [10, 2, 3, 4, 4, 6, 7, 8, 9, 5]
-        # self.n = 10  # No of processes
-        # The queue of process burst time
-        self.data = []
-        self.n = 0  # No of processes
+def fcfs(self):
+	print("First Come First Serve")
+	# clear data
+	self.turn_around_time['fcfs'] = []
+	self.wait_time['fcfs'] = []
 
-    # Getting the No of processes & burst time
-    def getData(self):
-        self.n = input("Enter the no of processes:\n")
-        for i in range(int(self.n)):
-            temp = input("Enter The BurstTime for Process p" + str(i)+"\n")
-            self.data.append(temp)
+	self.turn_around_time['fcfs'].append(self.burst_time[0])
+	self.wait_time['fcfs'].append(0) # first process wait time is 0
+	if len(self.burst_time) == self.total_process:
+		for n in range(1, self.total_process):
+			temp = self.burst_time[n-1] + self.wait_time['fcfs'][n-1]
+			self.wait_time['fcfs'].append(temp)
+			self.turn_around_time['fcfs'].append(temp + self.burst_time[n])
 
-    # First come First served Algorithm
-    def Fcfs(self):
-        Twt = 0.0
-        Bst = 0.0
-        Tat = 0.0
-        Wt = [0]
-        B = list(self.data)
-        for i in range(1, int(self.n)):
-            temp = int(B[i - 1]) + int(Wt[i - 1])
-            Wt.append(temp)
-        for i in range(0, int(self.n)):
-            Twt = Twt + Wt[i]
-        for i in range(0, int(self.n)):
-            Bst = Bst + Wt[i]
-        for i in range(0, int(self.n)):
-            Tat = Wt[i]+int(B[i])
+	self.calculate_avg_time('fcfs')
+	self.print_data('fcfs')
 
-        print("Total Waiting Time:"+str(Twt))
-        print("Average Waiting Time:"+str(Twt/int(self.n)))
-        print("Total Turnaround Time:"+str(Tat))
-        print("Average Turnaround Time:"+str(Tat/int(self.n)))
+def sjf(self):
+	print("Shortest Job First")
+	self.turn_around_time['sjf'] = []
+	self.wait_time['sjf'] = []
+	# sort using bubble sort
+	temp_burst_time = self.burst_time[:]
+	for t in range(0, self.total_process):
+		for s in range(0, self.total_process-1):
+			if temp_burst_time[s] > temp_burst_time[s+1]:
+				temp = temp_burst_time[s]
+				temp_burst_time[s] = temp_burst_time[s+1]
+				temp_burst_time[s+1] = temp
 
-    # Shortest job First Algorithm
-    def Sjf(self):
-        # Sort the brust time
-        Twt = 0.0
-        Bst = 0.0
-        aTat = 0.0
-        Wt = [0]
-        Tat=[0]
-        B = list(self.data)
-        for i in range(int(self.n), 0, -1):
-            for j in range(1, int(self.n)):
-                if B[j - 1] > B[j]:
-                    temp = B[j - 1]
-                    B[j - 1] = B[j]
-                    B[j] = temp
-        Wt = [0]
-        for i in range(1, int(self.n)):
-            temp = int(B[i - 1]) + int(Wt[i - 1])
-            Wt.append(temp)
-        for i in range(0, int(self.n)):
-            Twt = Twt + Wt[i]
-        for i in range(0, int(self.n)):
-            Bst = Bst + Wt[i]
-        for i in range(0, int(self.n)):
-            Tat = Wt[i]+int(B[i])
+	self.wait_time['sjf'].append(0) # first process wait time is 0
+	if len(self.burst_time) == self.total_process:
+		for n in range(1, self.total_process):
+			temp = self.burst_time[n-1] + self.wait_time['sjf'][n-1]
+			self.wait_time['sjf'].append(temp)
+			self.turn_around_time['sjf'].append(temp + self.burst_time[n])
 
-        print("Total Waiting Time:"+str(Twt))
-        print("Average Waiting Time:"+str(Twt/int(self.n)))
-        print("Total Turnaround Time:"+str(Tat))
-        print("Average Turnaround Time:"+str(Tat/int(self.n)))
+	self.calculate_avg_time('sjf')
+	self.print_data('sjf')
 
-    # Priority Algorithm
-    def Priority(self):
-        Twt = 0.0
-        Bst = 0.0
-        Tat = 0.0
-        w=0.0
-        Wt = [0]
-        B = [0]
-        # P = [0]
-        # pMax=5
-        # self.n=4
-        # B = [5,4,2,4]
-        # P = [4,2,6,3]
-        pMax=5
-        self.n=5
-        B = [8,4,2,1,4]
-        P = [5,3,1,2,4]
-        # self.n = input("Enter the no of processes:\n")
-        # for i in range(int(self.n)):
-        #     b, p = input("Enter The BurstTime and Priority for Process p" + str(i)+"\n").split()
-        #     B.append(b)
-        #     P.append(p)
-        #     if pMax<int(p):
-        #         pMax=int(p)
+def ps(self):
+	print("Priority Scheduling")
+	self.turn_around_time['ps'] = []
+	self.wait_time['ps'] = []
+	wait = 0
+	for t in range(0, max(self.priority)):
+		for n in range(0, self.total_process):
+			if self.priority[n] == t+1:
+				self.wait_time['ps'].append(wait)
+				self.turn_around_time['ps'].append(wait + self.burst_time[n])
+				wait = wait + self.burst_time[n]
 
-        for j in range(0,pMax):
-            for i in range(0,int(self.n)):
-                if P[i]==j:
-                    w=w+B[i]
-                    Wt.append(w)
+	self.calculate_avg_time('ps')
+	self.print_data('ps')
 
-        # Sort the process according to their priority
-        # for i in range(int(self.n)):
-        #     for j in range(1,int(self.n)):
-        #         if P[j - 1] < P[j]:
-        #             temp = B[j - 1]
-        #             B[j - 1] = B[j]
-        #             B[j] = temp
-        # Wt = [0]
-        # for i in range(1, int(self.n)):
-        #     temp = int(B[i - 1]) + int(Wt[i - 1])
-        #     Wt.append(temp)
-        # print(Wt)
-        for i in range(0, int(self.n)):
-            Twt = Twt + Wt[i]
-        for i in range(0, int(self.n)):
-            Bst = Bst + Wt[i]
-        for i in range(0, int(self.n)):
-            Tat = Wt[i]+int(B[i])
+def rr(self):
+	print("Round Robin")
+	self.turn_around_time['rr'] = []
+	self.wait_time['rr'] = []
 
-        print("Total Waiting Time:"+str(Twt))
-        print("Average Waiting Time:"+str(Twt/int(self.n)))
-        print("Total Turnaround Time:"+str(Tat))
-        print("Average Turnaround Time:"+str(Tat/int(self.n)))
+	remaining_burst_time = self.burst_time[:]
+	wt = [0]*self.total_process
+	time = 0
+	while (1):
+		done = True
+		for t in range(0, self.total_process):
+			if remaining_burst_time[t] > 0:
+				done = False
+				if remaining_burst_time[t] > self.quantum:
+					time += self.quantum
+					remaining_burst_time[t] -= self.quantum
+				else:
+					time += remaining_burst_time[t]
+					wt[t] = time - self.burst_time[t]
+					remaining_burst_time[t] = 0
+		if done == True:
+			break
 
-    # Shortest job First Algorithm with Preemption
-    def SjfP(self):
-        pass
+	self.wait_time['rr'] = wt
+	self.calculate_avg_time('rr')
+	self.print_data('rr')
 
-    # Shortest job First Algorithm with NonPreemption
-    def SjfNp(self):
-        pass
+def wrr(self):
+	print("Weighted Round Robin")
+	self.turn_around_time['wrr'] = []
+	self.wait_time['wrr'] = []
 
-    # Round Robin Algorithm
-    def RoundRobin(self):
-        Twt = 0
-        Bst = 0.0
-        w=0.0
-        Tat = [0]
-        aTat=0.0
-        Wt = [0]
-        quantum=4
-        B = list(self.data)
-        rem_bt = list(self.data)
-        t = 0 # Current time
-        while(1):
-            done = True
-            for i in range(int(self.n) ):
-                if (int(rem_bt[i]) > 0) :
-                    done = False # There is a pending process
-                    if (int(rem_bt[i]) > quantum) :
-                        t += quantum
-                        rem_bt[i] =int(rem_bt[i])- quantum
-                    else:
-                        t = t + int(rem_bt[i])
-                        Wt.append(t - int(B[i]))
-                        rem_bt[i] = 0
-            if (done == True):
-                break
-        for i in range(int(self.n)+1):
-            Twt = int(Twt) + int(Wt[i])
-        for i in range(int(self.n)):
-            temp=int(B[i]) + int(Wt[i])
-            Tat.append(temp)
-            aTat = aTat + Tat[i]
+	remaining_burst_time = self.burst_time[:]
+	wt = [0]*self.total_process
+	time = 0
+	while (1):
+		done = True
+		for t in range(0, self.total_process):
+			if remaining_burst_time[t] > 0:
+				done = False
+				quantum = self.quantum
+				if self.weight[t] > 0:
+					quantum *= self.weight[t] 
+				if remaining_burst_time[t] > quantum:
+					time += quantum
+					remaining_burst_time[t] -= quantum
+				else:
+					time += remaining_burst_time[t]
+					wt[t] = time - self.burst_time[t]
+					remaining_burst_time[t] = 0
+		if done == True:
+			break
 
-        print("Total Waiting Time:"+str(Twt))
-        print("Average Waiting Time:"+str(Twt/int(self.n)))
-        print("Total Turnaround Time:"+str(aTat))
-        print("Average Turnaround Time:"+str(aTat/int(self.n)))
+	self.wait_time['wrr'] = wt
+	self.calculate_avg_time('wrr')
+	self.print_data('wrr')
 
-class Runme:
-    def __init__(self):
-        self.schedular = Cpuschedule()
+class cpuschedule:
+	total_process = 0
+	burst_time = []
+	priority = []
+	weight = []
+	quantum = 0
+	wait_time = {
+		'fcfs' : [],
+		'sjf' : [],
+		'ps' : [],
+		'rr' : [],
+		'wrr' : [],
+	}
+	total_wait_time = {
+		'fcfs' : 0,
+		'sjf' : 0,
+		'ps' : 0,
+		'rr' : 0,
+		'wrr' : 0,
+	}
+	average_wait_time = {
+		'fcfs' : 0,
+		'sjf' : 0,
+		'ps' : 0,
+		'rr' : 0,
+		'wrr' : 0,
+	}
+	turn_around_time = {
+		'fcfs' : [],
+		'sjf' : [],
+		'ps' : [],
+		'rr' : [],
+		'wrr' : [],
+	}
+	avg_turn_around_time = {
+		'fcfs' : 0,
+		'sjf' : 0,
+		'ps' : 0,
+		'rr' : 0,
+		'wrr' : 0,
+	}
 
-    def run(self):
-        while True:
-            print("\n SIMULATION OF CPU SCHEDULING ALGORITHM")
-            print(" Menu:")
-            print(" 1. FCFS.")
-            print(" 2. SJF Normal.")
-            print(" 3. Priority Algorithm.")
-            print(" 4. SJF with Preemption.")
-            print(" 5. SJF with NonPreemption.")
-            print(" 6. RoundRobin.")
-            print(" 7. Quit.")
-            ch = int(input(" Select : "))
+	def getData(self):
+		try:
 
-            if ch == 1:
-                self.schedular.getData()
-                self.schedular.Fcfs()
-            elif ch == 2:
-                self.schedular.getData()
-                self.schedular.Sjf()
-            elif ch == 3:
-                self.schedular.Priority()
-            elif ch == 4:
-                self.schedular.getData()
-                # print("Not Implemented yet.")
-            elif ch == 5:
-                self.schedular.getData()
-                # print("Not Implemented yet.")
-            elif ch == 6:
-                self.schedular.getData()
-                self.schedular.RoundRobin()
-            elif ch == 7:
-                print(" See you soon.")
-                break
-            else:
-                print("Invalid Keywords.")
+			input_type = input("Use existing data (y/n): ")
+			if input_type == 'n':
+				self.total_process = int(input("Enter number of processes:"))
+				self.burst_time = []
+				self.priority = []
+				self.weight = []
+				for n in range(0, self.total_process):
+					bt = input("enter burst time of process "+str(n+1)+": ")
+					self.burst_time.append(int(bt))
+					p = input("enter priority of process "+str(n+1)+": ")
+					self.priority.append(int(p))
+					w = input("enter weight of process "+str(n+1)+": ")
+					self.weight.append(int(w))
+				self.quantum = int(input("enter quantum to use:"))
+			elif input_type == 'y':
+				self.total_process = 5
+				self.burst_time = [8, 4, 10, 20, 2]
+				self.priority = [4, 2, 1, 3, 5]
+				self.weight = [1, 2, 1, 3, 2]
+				self.quantum = 5
+			else:
+				print("Only y or n. Exiting !!!!")
+		except Exception as e:
+			print(e)
+			print("Sorry input error")
 
+	def calculate_avg_time(self, schedule): # calculate total and average
+		for t in range(0, len(self.wait_time[schedule])):
+			self.turn_around_time[schedule].append(self.wait_time[schedule][t] + self.burst_time[t])
+			self.total_wait_time[schedule] += self.wait_time[schedule][t]
 
-if __name__ == "__main__":
-    Runme().run()
+		self.average_wait_time[schedule] = float(self.total_wait_time[schedule])/self.total_process
+		self.avg_turn_around_time[schedule] = float(sum(self.turn_around_time[schedule]))/self.total_process
+
+	def print_data(self, schedule):
+		print("Total Waiting Time: " + str(self.total_wait_time[schedule]))
+		print("Average Waiting Time: " + str(self.average_wait_time[schedule]))
+		print("Average Turn Around Time: " + str(self.avg_turn_around_time[schedule]))
+		print("\n")
+
+	def write_data(self):
+		handle = open("output.txt", 'a')
+		path = os.path.abspath("output.txt")
+		size = os.path.getsize(path)
+
+		if (size == 0):
+			line = "Algorithm".ljust(32)
+			line += "Total Waiting Time".ljust(32)
+			line += "Average Waiting Time".ljust(32)
+			line += "Average Turn Around Time".ljust(32)
+			handle.write(line)
+
+		for algo in self.wait_time.keys():
+			new_line = algo.ljust(32)
+			new_line += str(self.total_wait_time[algo]).ljust(32)
+			new_line += str(self.average_wait_time[algo]).ljust(32)
+			new_line += str(self.avg_turn_around_time[algo]).ljust(32)
+			handle.write(new_line)
+
+		handle.write("\n\n")
+		handle.close()
+
+	first_come_first_serve = fcfs
+	shortest_job_first = sjf
+	priority_schedule = ps
+	round_robin = rr
+	weighted_round_robin = wrr
+
+schedule = cpuschedule()
+try:
+	while(1):
+		schedule.getData()
+		schedule.first_come_first_serve()
+		schedule.shortest_job_first()
+		schedule.priority_schedule()
+		schedule.round_robin()
+		schedule.weighted_round_robin()
+		schedule.write_data()
+		rerun = input("Exit? (y/n): ")
+		if rerun == 'y':
+			break
+
+except Exception as e:
+	print(e)
