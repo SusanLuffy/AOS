@@ -12,7 +12,7 @@ public:
     void Sjf();
     void Priority();
     void RoundRobin();
-    void WRR();
+    void WeightedRoundRobin();
 };
 void cpuschedule::Getdata(){
 int i;
@@ -216,7 +216,7 @@ for(i=1;i<=n;i++)
     cout<<"\n\tAverage Turnaround Time= "<<Atat;
 
 }
-void cpuschedule::WRR(){
+void cpuschedule::WeightedRoundRobin(){
 int i,B[10],B_rem[10],Q,t,k,W[10];
 Twt=0.0;
 Ttat=0.0;
@@ -314,7 +314,7 @@ switch(j) {
        case 5 :
          cout << "\n\tWeighted Round Robin Algorithm" << endl;
          cpu.Getdata();
-         cpu.WRR();
+         cpu.WeightedRoundRobin();
          main();
          break;
        case 6 :
