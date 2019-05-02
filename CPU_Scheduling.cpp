@@ -127,7 +127,7 @@ while(j<=max)//calculating the waiting time for each process
         if(P[i]==j)//searching the highest priority(lowest value Process)
         {
             Wt[i]=w;
-            w=w+B[i];//previous bburst time is waiting for next process
+            w=w+B[i];//previous burst time is waiting for next process
         }
         i++;
     }
